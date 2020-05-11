@@ -1,0 +1,17 @@
+stop 'failing test' # FIXME
+
+mkhomedir
+mksourcedir
+
+chezmoi remove --force $HOME${/}.bashrc
+! exists $HOME/.bashrc
+exists $HOME/.inputrc
+exists $HOME/.ssh/config
+
+chezmoi remove --force $HOME${/}.ssh
+exists $HOME/.inputrc
+! exists $HOME/.ssh/config
+
+! chezmoi remove --force $HOME${/}.bashrc $HOME${/}.inputrc
+stderr 'not in source state'
+exists $HOME/.inputrc
