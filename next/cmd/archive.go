@@ -1,10 +1,9 @@
 package cmd
 
-// FIXME add -j option to bzip2 compress output
-// FIXME add -z option to gzip compress output
-
 import (
 	"archive/tar"
+	"bytes"
+	"compress/gzip"
 	"os/user"
 	"strconv"
 	"strings"
@@ -24,6 +23,7 @@ var archiveCmd = &cobra.Command{
 }
 
 type archiveCmdConfig struct {
+	gzip      bool
 	include   *chezmoi.IncludeBits
 	recursive bool
 }
@@ -32,6 +32,7 @@ func init() {
 	rootCmd.AddCommand(archiveCmd)
 
 	persistentFlags := archiveCmd.PersistentFlags()
+	persistentFlags.BoolVarP(&config.archive.gzip, "gzip", "z", config.archive.gzip, "compress the output with gzip")
 	persistentFlags.VarP(config.archive.include, "include", "i", "include entry types")
 	persistentFlags.BoolVarP(&config.archive.recursive, "recursive", "r", config.archive.recursive, "recursive")
 }
@@ -45,7 +46,20 @@ func (c *Config) runArchiveCmd(cmd *cobra.Command, args []string) error {
 	if err := tarSystem.Close(); err != nil {
 		return err
 	}
-	return c.writeOutputString(sb.String())
+
+	if !c.archive.gzip {
+		return c.writeOutputString(sb.String())
+	}
+
+	output := &bytes.Buffer{}
+	w := gzip.NewWriter(output)
+	if _, err := w.Write([]byte(sb.String())); err != nil {
+		return err
+	}
+	if err := w.Close(); err != nil {
+		return err
+	}
+	return c.writeOutput(output.Bytes())
 }
 
 // tarHeaderTemplate returns a tar.Header template populated with the current
