@@ -12,6 +12,8 @@ chezmoi diff
 cmp stdout golden/add-file-diff
 rm ${CHEZMOISOURCEDIR}/dot_inputrc
 
+[short] stop
+
 # test that chezmoi diff generates a diff when a file is edited
 edit $HOME/.bashrc
 chezmoi diff

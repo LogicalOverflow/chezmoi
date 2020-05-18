@@ -5,6 +5,8 @@ exists $CHEZMOISOURCEDIR/empty_dot_bashrc
 exec ls $CHEZMOISOURCEDIR
 stdout -count=1 dot_bashrc
 
+[short] stop
+
 chezmoi chattr +p $HOME${/}.bashrc
 exists $CHEZMOISOURCEDIR/private_empty_dot_bashrc
 exec ls $CHEZMOISOURCEDIR

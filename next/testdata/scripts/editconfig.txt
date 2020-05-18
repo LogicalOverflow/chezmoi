@@ -1,8 +1,8 @@
-stop 'reading config files got broken' # FIXME
-
 # test that edit-config creates a config file if needed
 chezmoi edit-config
 grep -count=1 '# edited' $CHEZMOICONFIGDIR/chezmoi.toml
+
+[short] stop
 
 # test that edit-config edits an existing config file
 chezmoi edit-config

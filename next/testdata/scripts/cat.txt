@@ -4,6 +4,8 @@ mksourcedir
 chezmoi cat $HOME${/}.bashrc
 cmp stdout golden/.bashrc
 
+[short] stop
+
 chezmoi cat $HOME${/}.gitconfig
 cmp stdout golden/.gitconfig
 

@@ -5,8 +5,6 @@ exists $CHEZMOISOURCEDIR
 chezmoi purge --force
 ! exists $CHEZMOISOURCEDIR
 
-stop 'reading config files got broken' # FIXME
-
 # test chezmoi purge purges config dir
 chhome home2/user
 exists $CHEZMOICONFIGDIR

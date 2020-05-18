@@ -19,6 +19,8 @@ cmp $HOME/.bashrc golden/.bashrc
 ! exists $HOME/.ssh
 ! exists $HOME/.symlink
 
+[short] stop
+
 # test apply directory, non-recursive
 chezmoi apply --recursive=false $HOME${/}.ssh
 cmp $HOME/.bashrc golden/.bashrc

@@ -1,6 +1,8 @@
 chezmoi completion bash
 stdout '# bash completion for chezmoi'
 
+[short] stop
+
 chezmoi completion fish
 stdout '# fish completion for chezmoi'
 

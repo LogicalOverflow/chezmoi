@@ -3,6 +3,8 @@ mksourcedir
 chezmoi managed
 cmpenv stdout golden/managed
 
+[short] stop
+
 chezmoi managed --include=all
 cmpenv stdout golden/managed-all
 

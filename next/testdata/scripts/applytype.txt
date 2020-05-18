@@ -1,5 +1,7 @@
 # FIXME add more combinations
 
+[short] stop
+
 mkhomedir golden
 mkhomedir
 mksourcedir

@@ -1,5 +1,7 @@
 [windows] stop
 
+[short] stop
+
 mkhomedir golden
 mkhomedir
 mksourcedir
