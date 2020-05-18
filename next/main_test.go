@@ -38,10 +38,7 @@ func TestMain(m *testing.M) {
 	}))
 }
 
-func TestChezmoi(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration tests in short mode")
-	}
+func TestScript(t *testing.T) {
 	testscript.Run(t, testscript.Params{
 		Dir: filepath.Join("testdata", "scripts"),
 		Cmds: map[string]func(*testscript.TestScript, bool, []string){

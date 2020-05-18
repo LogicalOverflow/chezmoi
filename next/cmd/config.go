@@ -545,7 +545,6 @@ func (c *Config) init(rootCmd *cobra.Command) error {
 		"color",
 		"destination",
 		"format",
-		"recursive",
 		"remove",
 		"source",
 	} {
@@ -572,23 +571,20 @@ func (c *Config) init(rootCmd *cobra.Command) error {
 	}
 
 	cobra.OnInitialize(func() {
-		_, err := os.Stat(c.configFile)
-		switch {
-		case err == nil:
-			viper.SetConfigFile(c.configFile)
-			c.err = viper.ReadInConfig()
-			if c.err == nil {
-				c.err = viper.Unmarshal(&config)
-			}
-			if c.err == nil {
-				c.err = c.validateData()
-			}
-			if c.err != nil {
-				rootCmd.Printf("warning: %s: %v\n", c.configFile, c.err)
-			}
-		case os.IsNotExist(err):
-		default:
-			initErr = err
+		viper.SetConfigFile(c.configFile)
+		err := viper.ReadInConfig()
+		if os.IsNotExist(err) {
+			return
+		}
+		c.err = err
+		if c.err == nil {
+			c.err = viper.Unmarshal(c)
+		}
+		if c.err == nil {
+			c.err = c.validateData()
+		}
+		if c.err != nil {
+			rootCmd.Printf("warning: %s: %v\n", c.configFile, c.err)
 		}
 	})
 
@@ -596,6 +592,9 @@ func (c *Config) init(rootCmd *cobra.Command) error {
 }
 
 func (c *Config) persistentPreRunRootE(cmd *cobra.Command, args []string) error {
+	c.SourceDir = makeCleanAbsSlashPath(c.workingDir, c.SourceDir)
+	c.DestDir = makeCleanAbsSlashPath(c.workingDir, c.DestDir)
+
 	if !getBoolAnnotation(cmd, doesNotRequireValidConfig) {
 		if c.err != nil {
 			return errors.New("config contains errors, aborting")
