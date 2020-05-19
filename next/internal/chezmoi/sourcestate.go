@@ -17,18 +17,19 @@ import (
 
 // A SourceState is a source state.
 type SourceState struct {
-	entries         map[string]SourceStateEntry
-	system          System
-	sourcePath      string
-	umask           os.FileMode
-	encryptionTool  EncryptionTool
-	ignore          *PatternSet
-	minVersion      *semver.Version
-	remove          *PatternSet
-	templateData    map[string]interface{}
-	templateFuncs   template.FuncMap
-	templateOptions []string
-	templates       map[string]*template.Template
+	entries              map[string]SourceStateEntry
+	system               System
+	sourcePath           string
+	umask                os.FileMode
+	encryptionTool       EncryptionTool
+	ignore               *PatternSet
+	minVersion           *semver.Version
+	priorityTemplateData map[string]interface{}
+	remove               *PatternSet
+	templateData         map[string]interface{}
+	templateFuncs        template.FuncMap
+	templateOptions      []string
+	templates            map[string]*template.Template
 }
 
 // A SourceStateOption sets an option on a source state.
@@ -38,6 +39,14 @@ type SourceStateOption func(*SourceState)
 func WithEncryptionTool(encryptionTool EncryptionTool) SourceStateOption {
 	return func(s *SourceState) {
 		s.encryptionTool = encryptionTool
+	}
+}
+
+// WithPriorityTemplateData adds priority template data.
+func WithPriorityTemplateData(priorityTemplateData map[string]interface{}) SourceStateOption {
+	return func(s *SourceState) {
+		recursiveMerge(s.priorityTemplateData, priorityTemplateData)
+		recursiveMerge(s.templateData, s.priorityTemplateData)
 	}
 }
 
@@ -55,10 +64,11 @@ func WithSystem(system System) SourceStateOption {
 	}
 }
 
-// WithTemplateData sets the template data.
+// WithTemplateData adds template data.
 func WithTemplateData(templateData map[string]interface{}) SourceStateOption {
 	return func(s *SourceState) {
-		s.templateData = templateData
+		recursiveMerge(s.templateData, templateData)
+		recursiveMerge(s.templateData, s.priorityTemplateData)
 	}
 }
 
@@ -86,13 +96,14 @@ func WithUmask(umask os.FileMode) SourceStateOption {
 // NewSourceState creates a new source state with the given options.
 func NewSourceState(options ...SourceStateOption) *SourceState {
 	s := &SourceState{
-		entries:         make(map[string]SourceStateEntry),
-		umask:           DefaultUmask,
-		encryptionTool:  &nullEncryptionTool{},
-		ignore:          NewPatternSet(),
-		remove:          NewPatternSet(),
-		templateData:    make(map[string]interface{}),
-		templateOptions: DefaultTemplateOptions,
+		entries:              make(map[string]SourceStateEntry),
+		umask:                DefaultUmask,
+		encryptionTool:       &nullEncryptionTool{},
+		ignore:               NewPatternSet(),
+		priorityTemplateData: make(map[string]interface{}),
+		remove:               NewPatternSet(),
+		templateData:         make(map[string]interface{}),
+		templateOptions:      DefaultTemplateOptions,
 	}
 	for _, option := range options {
 		option(s)
@@ -251,11 +262,6 @@ func (s *SourceState) ExecuteTemplateData(name string, data []byte) ([]byte, err
 	return output.Bytes(), nil
 }
 
-// MergeTemplateData merges templateData into s's template data.
-func (s *SourceState) MergeTemplateData(templateData map[string]interface{}) {
-	recursiveMerge(s.templateData, templateData)
-}
-
 // MustEntry returns the source state entry associated with targetName, and
 // panics if it does not exist.
 func (s *SourceState) MustEntry(targetName string) SourceStateEntry {
@@ -293,8 +299,15 @@ func (s *SourceState) Read() error {
 		case strings.HasPrefix(info.Name(), dataName):
 			return s.addTemplateData(sourcePath)
 		case info.Name() == ignoreName:
+			// .chezmoiignore is interpreted as a template. vfs.WalkSlash walks
+			// in alphabetical order, so, luckily for us, .chezmoidata will be
+			// read before .chezmoiignore, so data in .chezmoidata is available
+			// to be used in .chezmoiignore. Unluckily for us, .chezmoitemplates
+			// will be read afterwards so partial templates will not be
+			// available in .chezmoiignore.
 			return s.addPatterns(s.ignore, sourcePath, sourceDirName)
 		case info.Name() == removeName:
+			// The comment about .chezmoiignore applies to .chezmoiremove too.
 			return s.addPatterns(s.remove, sourcePath, targetDirName)
 		case info.Name() == templatesDirName:
 			if err := s.addTemplatesDir(sourcePath); err != nil {
@@ -456,6 +469,7 @@ func (s *SourceState) addTemplateData(sourcePath string) error {
 		return fmt.Errorf("%s: %w", sourcePath, err)
 	}
 	recursiveMerge(s.templateData, templateData)
+	recursiveMerge(s.templateData, s.priorityTemplateData)
 	return nil
 }
 
