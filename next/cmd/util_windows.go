@@ -29,15 +29,6 @@ func getUmask() int {
 	return 0
 }
 
-// makeCleanAbsSlashPath returns a clean, absolute path separated with forward
-// slashes. If file is not an absolute path then it is joined on to dir.
-func makeCleanAbsSlashPath(dir, file string) string {
-	if !filepath.IsAbs(file) {
-		file = filepath.Join(dir, file)
-	}
-	return filepath.ToSlash(filepath.Clean(file))
-}
-
 func trimExecutableSuffix(s string) string {
 	if strings.EqualFold(filepath.Ext(s), ".exe") {
 		return s[:len(s)-4]

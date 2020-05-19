@@ -58,7 +58,7 @@ func TestRealSystemGlob(t *testing.T) {
 			actualMatches, err := s.Glob(tc.pattern)
 			require.NoError(t, err)
 			sort.Strings(actualMatches)
-			assert.Equal(t, tc.expectedMatches, actualMatches)
+			assert.Equal(t, tc.expectedMatches, PathsToSlashes(actualMatches))
 		})
 	}
 }

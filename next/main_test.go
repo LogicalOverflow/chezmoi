@@ -16,6 +16,7 @@ import (
 	"github.com/twpayne/go-vfs/vfst"
 
 	"github.com/twpayne/chezmoi/next/cmd"
+	"github.com/twpayne/chezmoi/next/internal/chezmoi"
 )
 
 //nolint:interfacer
@@ -76,8 +77,8 @@ func cmdChHome(ts *testscript.TestScript, neg bool, args []string) {
 	}
 	var (
 		homeDir          = ts.MkAbs(args[0])
-		chezmoiConfigDir = filepath.Join(homeDir, ".config", "chezmoi")
-		chezmoiSourceDir = filepath.Join(homeDir, ".local", "share", "chezmoi")
+		chezmoiConfigDir = chezmoi.PathJoin(homeDir, ".config/chezmoi")
+		chezmoiSourceDir = chezmoi.PathJoin(homeDir, ".local/share/chezmoi")
 	)
 	ts.Check(os.MkdirAll(homeDir, 0o777))
 	ts.Setenv("HOME", homeDir)
@@ -225,10 +226,10 @@ func cmdMkSourceDir(ts *testscript.TestScript, neg bool, args []string) {
 
 func setup(env *testscript.Env) error {
 	var (
-		binDir           = filepath.Join(env.WorkDir, "bin")
-		homeDir          = filepath.Join(env.WorkDir, "home", "user")
-		chezmoiConfigDir = filepath.Join(homeDir, ".config", "chezmoi")
-		chezmoiSourceDir = filepath.Join(homeDir, ".local", "share", "chezmoi")
+		binDir           = chezmoi.PathJoin(env.WorkDir, "bin")
+		homeDir          = chezmoi.PathJoin(env.WorkDir, "home/user")
+		chezmoiConfigDir = chezmoi.PathJoin(homeDir, ".config/chezmoi")
+		chezmoiSourceDir = chezmoi.PathJoin(homeDir, ".local/share/chezmoi")
 	)
 
 	env.Setenv("HOME", homeDir)

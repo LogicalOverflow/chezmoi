@@ -591,8 +591,8 @@ func (c *Config) init(rootCmd *cobra.Command) error {
 }
 
 func (c *Config) persistentPreRunRootE(cmd *cobra.Command, args []string) error {
-	c.SourceDir = makeCleanAbsSlashPath(c.workingDir, c.SourceDir)
-	c.DestDir = makeCleanAbsSlashPath(c.workingDir, c.DestDir)
+	c.SourceDir = chezmoi.PathJoin(c.workingDir, c.SourceDir)
+	c.DestDir = chezmoi.PathJoin(c.workingDir, c.DestDir)
 
 	if !getBoolAnnotation(cmd, doesNotRequireValidConfig) {
 		if c.err != nil {
