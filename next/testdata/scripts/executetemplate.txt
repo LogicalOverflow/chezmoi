@@ -13,24 +13,29 @@ stdout stdin-template
 chezmoi execute-template '{{ template "partial" }}'
 stdout partial-template
 
+# FIXME merge the following tests into a single test
+
+chezmoi execute-template '{{ .last.config }}'
+stdout 'chezmoi\.toml'
+
 # test that template data are read from .chezmoidata.json
-chezmoi execute-template '{{ .json.key }}'
-stdout json
+chezmoi execute-template '{{ .last.json }}'
+stdout '\.chezmoidata\.json'
 
 # test that template data are read from .chezmoidata.toml
-chezmoi execute-template '{{ .toml.key }}'
-stdout toml
+chezmoi execute-template '{{ .last.toml }}'
+stdout '\.chezmoidata\.toml'
 
 # test that template data are read from .chezmoidata.yaml
-chezmoi execute-template '{{ .yaml.key }}'
-stdout yaml
+chezmoi execute-template '{{ .last.yaml }}'
+stdout '\.chezmoidata\.yaml'
 
 # test that the last .chezmoidata.<format> file read wins
-chezmoi execute-template '{{ .chezmoidata.last }}'
-stdout yaml
+chezmoi execute-template '{{ .last.format }}'
+stdout '\.chezmoidata\.yaml'
 
 # test that the config file wins over .chezmoidata.<format>
-chezmoi execute-template '{{ .global.last }}'
+chezmoi execute-template '{{ .last.global }}'
 stdout chezmoi.toml
 
 # test --init --promptString
@@ -40,33 +45,26 @@ stdout 'user@home\.org'
 -- golden/stdin.tmpl --
 {{ "stdin-template" }}
 -- home/user/.config/chezmoi/chezmoi.toml --
-[data.global]
-  last = "chezmoi.toml"
+[data.last]
+  config = "chezmoi.toml"
+  global = "chezmoi.toml"
 -- home/user/.local/share/chezmoi/.chezmoidata.json --
 {
-  "chezmoidata": {
-    "last": "json"
-  },
-  "global": {
-    "last": ".chezmoidata.json"
-  },
-  "json": {
-    "key": "json"
+  "last": {
+    "format": ".chezmoidata.json",
+    "global": ".chezmoidata.json",
+    "json": ".chezmoidata.json"
   }
 }
 -- home/user/.local/share/chezmoi/.chezmoidata.toml --
-[chezmoidata]
-  last = "toml"
-[global]
-  last = ".chezmoidata.toml"
-[toml]
-  key = "toml"
+[last]
+  format = ".chezmoidata.toml"
+  global = ".chezmoidata.toml"
+  toml = ".chezmoidata.toml"
 -- home/user/.local/share/chezmoi/.chezmoidata.yaml --
-chezmoidata:
-  last: yaml
-global:
-  last: .chezmoidata.yaml
-yaml:
-  key: yaml
+last:
+    format: ".chezmoidata.yaml"
+    global: ".chezmoidata.yaml"
+    yaml: ".chezmoidata.yaml"
 -- home/user/.local/share/chezmoi/.chezmoitemplates/partial --
 partial-template

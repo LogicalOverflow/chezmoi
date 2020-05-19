@@ -99,46 +99,46 @@ stderr 'not in source state'
 }
 -- golden/dump.yaml --
 .bashrc:
-  type: file
-  name: .bashrc
-  contents: |
-    # contents of .bashrc
-  perm: 420
+    type: file
+    name: .bashrc
+    contents: |
+        # contents of .bashrc
+    perm: 420
 .binary:
-  type: file
-  name: .binary
-  contents: |
-    #!/bin/sh
-  perm: 493
+    type: file
+    name: .binary
+    contents: |
+        #!/bin/sh
+    perm: 493
 .gitconfig:
-  type: file
-  name: .gitconfig
-  contents: |
-    [user]
-      email = user@home.org
-  perm: 420
+    type: file
+    name: .gitconfig
+    contents: |
+        [user]
+          email = user@home.org
+    perm: 420
 .hushlogin:
-  type: file
-  name: .hushlogin
-  contents: ""
-  perm: 420
+    type: file
+    name: .hushlogin
+    contents: ""
+    perm: 420
 .ssh:
-  type: dir
-  name: .ssh
-  perm: 448
+    type: dir
+    name: .ssh
+    perm: 448
 .ssh/config:
-  type: file
-  name: .ssh/config
-  contents: |
-    # contents of .ssh/config
-  perm: 420
+    type: file
+    name: .ssh/config
+    contents: |
+        # contents of .ssh/config
+    perm: 420
 .symlink:
-  type: symlink
-  name: .symlink
-  linkname: .bashrc
+    type: symlink
+    name: .symlink
+    linkname: .bashrc
 script:
-  type: script
-  name: script
-  contents: |
-    #!/bin/sh
-    echo script
+    type: script
+    name: script
+    contents: |
+        #!/bin/sh
+        echo script

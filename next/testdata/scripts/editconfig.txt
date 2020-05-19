@@ -22,6 +22,6 @@ grep -count=1 '# edited' $CHEZMOICONFIGDIR/chezmoi.json
 
 -- home2/user/.config/chezmoi/chezmoi.yaml --
 data:
-  email: "user@home.org"
+    email: "user@home.org"
 -- home3/user/.config/chezmoi/chezmoi.json --
 {"data":{"email":"user@home.org"}}

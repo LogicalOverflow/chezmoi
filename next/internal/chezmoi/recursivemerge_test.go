@@ -53,3 +53,16 @@ func TestRecursiveMerge(t *testing.T) {
 		assert.Equal(t, tc.expectedDest, tc.dest)
 	}
 }
+
+func TestRecursiveMergeCopies(t *testing.T) {
+	original := map[string]interface{}{
+		"key": "initialValue",
+	}
+	dest := make(map[string]interface{})
+	recursiveMerge(dest, original)
+	recursiveMerge(dest, map[string]interface{}{
+		"key": "mergedValue",
+	})
+	assert.Equal(t, "mergedValue", dest["key"])
+	assert.Equal(t, "initialValue", original["key"])
+}
