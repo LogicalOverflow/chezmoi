@@ -99,6 +99,9 @@ func cmdCmpMod(ts *testscript.TestScript, neg bool, args []string) {
 	if err != nil || os.FileMode(mode64)&os.ModePerm != os.FileMode(mode64) {
 		ts.Fatalf("invalid mode: %s", args[0])
 	}
+	if !chezmoi.POSIXFileModes {
+		return
+	}
 	info, err := os.Stat(args[1])
 	if err != nil {
 		ts.Fatalf("%s: %v", args[1], err)
@@ -239,26 +242,30 @@ func setup(env *testscript.Env) error {
 	env.Setenv("CHEZMOISOURCEDIR", chezmoiSourceDir)
 	switch runtime.GOOS {
 	case "windows":
-		env.Setenv("EDITOR", filepath.Join(binDir, "editor.cmd"))
+		env.Setenv("EDITOR", chezmoi.PathJoin(binDir, "editor.cmd"))
 		env.Setenv("USERPROFILE", homeDir)
 		env.Setenv("WORKSLASH", filepath.ToSlash(env.WorkDir))
 		// There is not currently a convenient way to override the shell on
 		// Windows.
 	default:
-		env.Setenv("EDITOR", filepath.Join(binDir, "editor"))
-		env.Setenv("SHELL", filepath.Join(binDir, "shell"))
+		env.Setenv("EDITOR", chezmoi.PathJoin(binDir, "editor"))
+		env.Setenv("SHELL", chezmoi.PathJoin(binDir, "shell"))
 		env.Setenv("WORKSLASH", env.WorkDir)
 	}
 
-	// Fix permissions on the source directory, if it exists.
-	_ = os.Chmod(chezmoiSourceDir, 0o700)
+	if chezmoi.POSIXFileModes {
+		// Fix permissions on the source directory, if it exists.
+		if err := os.Chmod(chezmoiSourceDir, 0o700); err != nil && !os.IsNotExist(err) {
+			return err
+		}
 
-	// Fix permissions on any files in the bin directory.
-	infos, err := ioutil.ReadDir(binDir)
-	if err == nil {
-		for _, info := range infos {
-			if err := os.Chmod(filepath.Join(binDir, info.Name()), 0o755); err != nil {
-				return err
+		// Fix permissions on any files in the bin directory.
+		infos, err := ioutil.ReadDir(binDir)
+		if err == nil {
+			for _, info := range infos {
+				if err := os.Chmod(filepath.Join(binDir, info.Name()), 0o755); err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -295,7 +302,7 @@ func setup(env *testscript.Env) error {
 				Contents: []byte(strings.Join([]string{
 					`#!/bin/sh`,
 					``,
-					`echo $PWD >> ` + filepath.Join(env.WorkDir, "shell.log"),
+					`echo $PWD >> ` + chezmoi.PathJoin(env.WorkDir, "shell.log"),
 				}, "\n")),
 			},
 		}
